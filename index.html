@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Archer.io Ultimate</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            overflow: hidden;
+            background: radial-gradient(circle at center, #1a2a6c, #0f0c29);
+            font-family: 'Arial', sans-serif;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            color: white;
+        }
+        
+        /* Login Screen */
+        #loginScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.8);
+            z-index: 300;
+            backdrop-filter: blur(5px);
+        }
+        
+        .login-container {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .login-title {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+        
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 16px;
+        }
+        
+        .login-input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background: linear-gradient(to right, #3498db, #2ecc71);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .login-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(52,152,219,0.5);
+        }
+        
+        /* Game Canvas */
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Game UI */
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            font-size: 16px;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        #mobileControls {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 100;
+        }
+        
+        .joystick {
+            width: 110px;
+            height: 110px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 50%;
+            position: relative;
+            touch-action: none;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .joystick-inner {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            transition: transform 0.1s;
+        }
+        
+        #shootButton {
+            width: 90px;
+            height: 90px;
+            background: radial-gradient(circle, rgba(255,87,34,0.9) 0%, rgba(230,74,25,0.9) 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            touch-action: none;
+            user-select: none;
+            box-shadow: 0 5px 15px rgba(255,87,34,0.4);
+            border: 2px solid rgba(255,255,255,0.3);
+            transition: transform 0.1s;
+        }
+        
+        #shootButton:active {
+            transform: scale(0.95);
+            background: radial-gradient(circle, rgba(230,74,25,0.9) 0%, rgba(191,57,16,0.9) 100%);
+        }
+        
+        #weaponSelector {
+            position: absolute;
+            bottom: 120px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .weapon-btn {
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 12px;
+            touch-action: none;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.2s;
+        }
+        
+        .weapon-btn.active {
+            background: rgba(255,87,34,0.8);
+            border: 2px solid white;
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255,87,34,0.6);
+        }
+        
+        #startScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 200;
+            backdrop-filter: blur(5px);
+        }
+        
+        #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 200;
+        }
+        
+        .floating-text {
+            position: absolute;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+            z-index: 50;
+            animation: floatUp 1s forwards;
+            pointer-events: none;
+        }
+        
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-50px); opacity: 0; }
+        }
+        
+        .combo-text {
+            font-size: 24px;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0,255,255,0.7);
+        }
+        
+        .boss-enemy {
+            box-shadow: 0 0 20px red;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        #logoutButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 8px 15px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            z-index: 200;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen">
+        <div class="login-container">
+            <h1 class="login-title">Archer.io Ultimate</h1>
+            <input type="text" id="usernameInput" class="login-input" placeholder="Username">
+            <input type="password" id="passwordInput" class="login-input" placeholder="Password">
+            <button id="loginButton" class="login-btn">Login & Play</button>
+        </div>
+    </div>
+    
+    <!-- Game Container -->
+    <div id="gameContainer" style="display:none;">
+        <button id="logoutButton">Logout</button>
+        
+        <div id="ui">
+            <div>Score: <span id="score">0</span></div>
+            <div>Health: <span id="health">100</span>%</div>
+            <div id="comboDisplay"></div>
+        </div>
+        
+        <div id="mobileControls">
+            <div class="joystick" id="movementJoystick">
+                <div class="joystick-inner" id="movementKnob"></div>
+            </div>
+            <div id="shootButton">SHOOT</div>
+        </div>
+        
+        <div id="weaponSelector">
+            <div class="weapon-btn active" data-weapon="normal" title="Normal Arrow">🏹</div>
+            <div class="weapon-btn" data-weapon="triple" title="Triple Shot">🔺</div>
+            <div class="weapon-btn" data-weapon="explosive" title="Explosive Arrow">💥</div>
+            <div class="weapon-btn" data-weapon="laser" title="Laser Beam">🔆</div>
+        </div>
+        
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="startScreen">
+            <h1>Archer.io Ultimate</h1>
+            <p>Defeat enemies and survive as long as possible!</p>
+            <button id="startButton">Start Game</button>
+        </div>
+        
+        <div id="gameOverScreen">
+            <h1>Game Over</h1>
+            <div id="finalScore">Score: 0</div>
+            <button id="restartButton">Play Again</button>
+        </div>
+    </div>
+    <!-- Tambahkan dialog konfirmasi di HTML -->
+<div id="logoutConfirm" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:400; display:flex; justify-content:center; align-items:center;">
+    <div style="background:#333; padding:20px; border-radius:10px; text-align:center;">
+        <h3>Logout Confirmation</h3>
+        <p>Are you sure you want to logout?</p>
+        <div style="display:flex; justify-content:center; gap:10px; margin-top:20px;">
+            <button id="confirmLogoutYes" style="padding:8px 20px; background:#e74c3c; color:white; border:none; border-radius:5px;">Yes</button>
+            <button id="confirmLogoutNo" style="padding:8px 20px; background:#3498db; color:white; border:none; border-radius:5px;">No</button>
+        </div>
+    </div>
+</div>
+
+
+    <script>
+    // Update fungsi logout
+function showLogoutConfirm() {
+    document.getElementById('logoutConfirm').style.display = 'flex';
+}
+
+function hideLogoutConfirm() {
+    document.getElementById('logoutConfirm').style.display = 'none';
+}
+
+function logout() {
+    currentUser = null;
+    localStorage.removeItem('archerio_current_user');
+    gameContainer.style.display = 'none';
+    loginScreen.style.display = 'flex';
+    gameRunning = false;
+    hideLogoutConfirm();
+}
+
+// Event listeners untuk dialog konfirmasi
+document.getElementById('logoutButton').addEventListener('click', showLogoutConfirm);
+document.getElementById('confirmLogoutNo').addEventListener('click', hideLogoutConfirm);
+document.getElementById('confirmLogoutYes').addEventListener('click', logout);
+
+// Jika menggunakan Cordova/PhoneGap, tambahkan ini:
+document.addEventListener('backbutton', function(e) {
+    if(gameRunning) {
+        e.preventDefault();
+        showLogoutConfirm();
+    }
+}, false);
+        // Game variables
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const healthElement = document.getElementById('health');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const finalScoreElement = document.getElementById('finalScore');
+        const startButton = document.getElementById('startButton');
+        const restartButton = document.getElementById('restartButton');
+        const shootButton = document.getElementById('shootButton');
+        const comboDisplay = document.getElementById('comboDisplay');
+        const loginScreen = document.getElementById('loginScreen');
+        const loginButton = document.getElementById('loginButton');
+        const logoutButton = document.getElementById('logoutButton');
+        const gameContainer = document.getElementById('gameContainer');
+        
+        // User data
+        let currentUser = null;
+        let gameRunning = false;
+        
+        // Set canvas size
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Login functionality
+        loginButton.addEventListener('click', function() {
+            const username = document.getElementById('usernameInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
+            
+            if(username === '' || password === '') {
+                alert('Please enter both username and password!');
+                return;
+            }
+            
+            // Simple login simulation
+            currentUser = {
+                username: username,
+                score: 0,
+                level: 1
+            };
+            
+            localStorage.setItem('archerio_current_user', JSON.stringify(currentUser));
+            
+            loginScreen.style.display = 'none';
+            gameContainer.style.display = 'block';
+            
+            initializeGame();
+        });
+        
+        // Check for existing user
+        window.addEventListener('load', function() {
+            const savedUser = localStorage.getItem('archerio_current_user');
+            if(savedUser) {
+                currentUser = JSON.parse(savedUser);
+                loginScreen.style.display = 'none';
+                gameContainer.style.display = 'block';
+                initializeGame();
+            }
+        });
+        
+        // Logout functionality
+        logoutButton.addEventListener('click', function() {
+            if(confirm('Are you sure you want to logout?')) {
+                currentUser = null;
+                localStorage.removeItem('archerio_current_user');
+                gameContainer.style.display = 'none';
+                loginScreen.style.display = 'flex';
+                gameRunning = false;
+            }
+        });
+        
+        // Exit confirmation
+        window.addEventListener('beforeunload', function(e) {
+            if(gameRunning) {
+                e.preventDefault();
+                e.returnValue = 'Are you sure you want to leave the game? Your progress may not be saved.';
+                return e.returnValue;
+            }
+        });
+        
+        // Game initialization
+        function initializeGame() {
+            // Game state
+            let score = currentUser ? currentUser.score : 0;
+            let health = 100;
+            let selectedWeapon = 'normal';
+            let comboCount = 0;
+            let lastEnemyDefeatTime = 0;
+            let bossActive = false;
+            
+            // Player object
+            let player = {
+                x: canvas.width/2,
+                y: canvas.height/2,
+                radius: 25,
+                color: '#3498db',
+                speed: 5,
+                lastShot: 0,
+                shootDelay: 300
+            };
+            
+            // Game objects
+            let arrows = [];
+            let enemies = [];
+            let particles = [];
+            let floatingTexts = [];
+            let lasers = [];
+            
+            // Mobile controls
+            let movementJoystickActive = false;
+            let movementJoystickX = 0;
+            let movementJoystickY = 0;
+            
+            // Initialize joystick
+            const movementJoystick = document.getElementById('movementJoystick');
+            const movementKnob = document.getElementById('movementKnob');
+            
+            // Touch events for joystick
+            movementJoystick.addEventListener('touchstart', handleJoystickStart, { passive: false });
+            movementJoystick.addEventListener('touchmove', handleJoystickMove, { passive: false });
+            movementJoystick.addEventListener('touchend', handleJoystickEnd);
+            
+            // Mouse events for desktop testing
+            movementJoystick.addEventListener('mousedown', handleJoystickStart);
+            document.addEventListener('mousemove', handleJoystickMove);
+            document.addEventListener('mouseup', handleJoystickEnd);
+            
+            function handleJoystickStart(e) {
+                e.preventDefault();
+                movementJoystickActive = true;
+                updateJoystickPosition(e.touches ? e.touches[0] : e);
+            }
+            
+            function handleJoystickMove(e) {
+                if (movementJoystickActive) {
+                    e.preventDefault();
+                    updateJoystickPosition(e.touches ? e.touches[0] : e);
+                }
+            }
+            
+            function handleJoystickEnd() {
+                movementJoystickActive = false;
+                movementKnob.style.transform = 'translate(30px, 30px)';
+                movementJoystickX = 0;
+                movementJoystickY = 0;
+            }
+            
+            function updateJoystickPosition(touch) {
+                const rect = movementJoystick.getBoundingClientRect();
+                const centerX = rect.left + rect.width/2;
+                const centerY = rect.top + rect.height/2;
+                const radius = rect.width/2;
+                
+                const dx = touch.clientX - centerX;
+                const dy = touch.clientY - centerY;
+                const distance = Math.sqrt(dx*dx + dy*dy);
+                
+                let moveX = dx;
+                let moveY = dy;
+                
+                if (distance > radius) {
+                    moveX = dx * radius / distance;
+                    moveY = dy * radius / distance;
+                }
+                
+                movementKnob.style.transform = `translate(${moveX + 30}px, ${moveY + 30}px)`;
+                
+                // Normalize values between -1 and 1
+                movementJoystickX = moveX / radius;
+                movementJoystickY = moveY / radius;
+            }
+            
+            // Weapon selection
+            document.querySelectorAll('.weapon-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    if (gameRunning) {
+                        document.querySelectorAll('.weapon-btn').forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        selectedWeapon = button.dataset.weapon;
+                        createFloatingText(player.x, player.y - 30, `Selected: ${button.title}`, '#00ffff');
+                    }
+                });
+            });
+            
+            // Start game
+            startButton.addEventListener('click', startGame);
+            restartButton.addEventListener('click', startGame);
+            
+            function startGame() {
+                // Reset game state
+                score = currentUser ? currentUser.score : 0;
+                health = 100;
+                arrows = [];
+                enemies = [];
+                particles = [];
+                floatingTexts = [];
+                lasers = [];
+                comboCount = 0;
+                bossActive = false;
+                
+                // Set player position
+                player.x = canvas.width/2;
+                player.y = canvas.height/2;
+                
+                // Update UI
+                scoreElement.textContent = score;
+                healthElement.textContent = health;
+                comboDisplay.textContent = '';
+                
+                // Hide screens
+                startScreen.style.display = 'none';
+                gameOverScreen.style.display = 'none';
+                
+                gameRunning = true;
+                spawnEnemies();
+                gameLoop();
+            }
+            
+            // Spawn enemies
+            function spawnEnemies() {
+                // Clear any existing interval
+                if (window.enemySpawnInterval) {
+                    clearInterval(window.enemySpawnInterval);
+                }
+                
+                // Spawn regular enemies
+                window.enemySpawnInterval = setInterval(() => {
+                    if (!gameRunning) return;
+                    
+                    // Spawn boss every 500 points
+                    if (score > 0 && score % 500 === 0 && !bossActive) {
+                        spawnBoss();
+                        return;
+                    }
+                    
+                    const size = Math.random() * 20 + 15;
+                    let x, y;
+                    
+                    // Spawn from edges
+                    if (Math.random() < 0.5) {
+                        x = Math.random() < 0.5 ? 0 - size : canvas.width + size;
+                        y = Math.random() * canvas.height;
+                    } else {
+                        x = Math.random() * canvas.width;
+                        y = Math.random() < 0.5 ? 0 - size : canvas.height + size;
+                    }
+                    
+                    enemies.push({
+                        x: x,
+                        y: y,
+                        radius: size,
+                        color: `hsl(${Math.random() * 360}, 70%, 50%)`,
+                        speed: Math.random() * 2 + 1,
+                        health: size,
+                        damage: size / 10
+                    });
+                }, 1000);
+            }
+            
+            function spawnBoss() {
+                bossActive = true;
+                createFloatingText(canvas.width/2, canvas.height/3, "BOSS INCOMING!", "red");
+                
+                enemies.push({
+                    x: canvas.width/2,
+                    y: -100,
+                    radius: 60,
+                    color: 'red',
+                    speed: 1.5,
+                    health: 300,
+                    damage: 5,
+                    isBoss: true
+                });
+            }
+            
+            // Shoot function
+            function shoot() {
+                if (!gameRunning || Date.now() - player.lastShot < player.shootDelay) return;
+                
+                player.lastShot = Date.now();
+                
+                // Get angle based on joystick or default (up)
+                let angle = movementJoystickActive ? 
+                    Math.atan2(-movementJoystickY, -movementJoystickX) : 
+                    -Math.PI/2;
+                
+                switch(selectedWeapon) {
+                    case 'normal':
+                        createArrow(angle, 'normal');
+                        break;
+                    case 'triple':
+                        createArrow(angle - 0.2, 'normal');
+                        createArrow(angle, 'normal');
+                        createArrow(angle + 0.2, 'normal');
+                        break;
+                    case 'explosive':
+                        createArrow(angle, 'explosive');
+                        break;
+                    case 'laser':
+                        createLaser(angle);
+                        break;
+                }
+            }
+            
+            function createArrow(angle, type) {
+                arrows.push({
+                    x: player.x + Math.cos(angle) * player.radius,
+                    y: player.y + Math.sin(angle) * player.radius,
+                    dx: Math.cos(angle) * 12,
+                    dy: Math.sin(angle) * 12,
+                    angle: angle,
+                    type: type,
+                    radius: type === 'explosive' ? 6 : 4,
+                    damage: type === 'explosive' ? 20 : 10
+                });
+                
+                // Shooting particles
+                for (let i = 0; i < 3; i++) {
+                    particles.push({
+                        x: player.x + Math.cos(angle) * player.radius,
+                        y: player.y + Math.sin(angle) * player.radius,
+                        radius: Math.random() * 2 + 1,
+                        color: type === 'explosive' ? '#e74c3c' : '#f39c12',
+                        dx: Math.cos(angle) * (Math.random() * 3 + 2),
+                        dy: Math.sin(angle) * (Math.random() * 3 + 2),
+                        life: 20
+                    });
+                }
+            }
+            
+            function createLaser(angle) {
+                lasers.push({
+                    x: player.x,
+                    y: player.y,
+                    angle: angle,
+                    length: canvas.width * 1.5,
+                    width: 8,
+                    life: 10,
+                    maxLife: 10
+                });
+                
+                // Damage enemies in laser path
+                enemies.forEach((enemy, index) => {
+                    const distToLaser = pointToLineDistance(
+                        enemy.x, enemy.y,
+                        player.x, player.y,
+                        player.x + Math.cos(angle) * canvas.width * 2,
+                        player.y + Math.sin(angle) * canvas.width * 2
+                    );
+                    
+                    if (distToLaser < enemy.radius + 5) {
+                        enemy.health -= 30;
+                        
+                        if (enemy.health <= 0) {
+                            if (enemy.isBoss) {
+                                score += 200;
+                                createFloatingText(enemy.x, enemy.y, "BOSS DEFEATED! +200", "gold");
+                                bossActive = false;
+                            } else {
+                                score += Math.floor(enemy.radius * 1.5);
+                            }
+                            enemies.splice(index, 1);
+                            updateCombo();
+                        }
+                    }
+                });
+            }
+            
+            function pointToLineDistance(x, y, x1, y1, x2, y2) {
+                // Math to calculate distance from point to line
+                const A = x - x1;
+                const B = y - y1;
+                const C = x2 - x1;
+                const D = y2 - y1;
+                
+                const dot = A * C + B * D;
+                const len_sq = C * C + D * D;
+                let param = -1;
+                
+                if (len_sq !== 0) param = dot / len_sq;
+                
+                let xx, yy;
+                
+                if (param < 0) {
+                    xx = x1;
+                    yy = y1;
+                }
+                else if (param > 1) {
+                    xx = x2;
+                    yy = y2;
+                }
+                else {
+                    xx = x1 + param * C;
+                    yy = y1 + param * D;
+                }
+                
+                const dx = x - xx;
+                const dy = y - yy;
+                return Math.sqrt(dx * dx + dy * dy);
+            }
+            
+            function updateCombo() {
+                const now = Date.now();
+                if (now - lastEnemyDefeatTime < 2000) {
+                    comboCount++;
+                } else {
+                    comboCount = 1;
+                }
+                lastEnemyDefeatTime = now;
+                
+                if (comboCount > 1) {
+                    comboDisplay.textContent = `${comboCount}x COMBO!`;
+                    comboDisplay.className = 'combo-text';
+                    
+                    // Bonus points for combos
+                    if (comboCount % 3 === 0) {
+                        const bonus = comboCount * 5;
+                        score += bonus;
+                        createFloatingText(player.x, player.y - 50, `COMBO BONUS +${bonus}!`, "gold");
+                    }
+                }
+            }
+            
+            function createExplosion(x, y, count, maxSpeed) {
+                for (let i = 0; i < count; i++) {
+                    particles.push({
+                        x: x,
+                        y: y,
+                        radius: Math.random() * 4 + 2,
+                        color: `hsl(${Math.random() * 60 + 20}, 100%, 50%)`,
+                        dx: Math.random() * maxSpeed * 2 - maxSpeed,
+                        dy: Math.random() * maxSpeed * 2 - maxSpeed,
+                        life: Math.random() * 30 + 20
+                    });
+                }
+            }
+            
+            function createFloatingText(x, y, text, color) {
+                floatingTexts.push({
+                    x: x,
+                    y: y,
+                    text: text,
+                    color: color,
+                    life: 60
+                });
+            }
+            
+            // Game loop
+            function gameLoop() {
+                if (!gameRunning) return;
+                
+                update();
+                render();
+                requestAnimationFrame(gameLoop);
+            }
+            
+            function update() {
+                // Update joystick position
+                if (movementJoystickActive) {
+                    player.x += movementJoystickX * player.speed;
+                    player.y += movementJoystickY * player.speed;
+                    
+                    // Keep player in bounds
+                    player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x));
+                    player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
+                }
+                
+                // Update arrows
+                arrows.forEach((arrow, index) => {
+                    arrow.x += arrow.dx;
+                    arrow.y += arrow.dy;
+                    
+                    // Remove out of bounds
+                    if (arrow.x < 0 || arrow.x > canvas.width || arrow.y < 0 || arrow.y > canvas.height) {
+                        arrows.splice(index, 1);
+                        return;
+                    }
+                    
+                    // Check collisions
+                    enemies.forEach((enemy, enemyIndex) => {
+                        const dist = Math.hypot(arrow.x - enemy.x, arrow.y - enemy.y);
+                        if (dist < enemy.radius) {
+                            enemy.health -= arrow.damage;
+                            arrows.splice(index, 1);
+                            
+                            // Explosive arrow effect
+                            if (arrow.type === 'explosive') {
+                                createExplosion(arrow.x, arrow.y, 60, 15);
+                                
+                                // Damage nearby enemies
+                                enemies.forEach((e, i) => {
+                                    const explosionDist = Math.hypot(arrow.x - e.x, arrow.y - e.y);
+                                    if (explosionDist < 60 && i !== enemyIndex) {
+                                        e.health -= 10;
+                                        if (e.health <= 0) {
+                                            if (e.isBoss) {
+                                                score += 200;
+                                                createFloatingText(e.x, e.y, "BOSS DEFEATED! +200", "gold");
+                                                bossActive = false;
+                                            } else {
+                                                score += Math.floor(e.radius);
+                                            }
+                                            enemies.splice(i, 1);
+                                            updateCombo();
+                                        }
+                                    }
+                                });
+                            }
+                            
+                            if (enemy.health <= 0) {
+                                if (enemy.isBoss) {
+                                    score += 200;
+                                    createFloatingText(enemy.x, enemy.y, "BOSS DEFEATED! +200", "gold");
+                                    bossActive = false;
+                                } else {
+                                    score += Math.floor(enemy.radius * (arrow.type === 'explosive' ? 1.2 : 1));
+                                }
+                                enemies.splice(enemyIndex, 1);
+                                updateCombo();
+                            }
+                            return;
+                        }
+                    });
+                });
+                
+                // Update lasers
+                lasers.forEach((laser, index) => {
+                    laser.life--;
+                    if (laser.life <= 0) {
+                        lasers.splice(index, 1);
+                    }
+                });
+                
+                // Update enemies
+                enemies.forEach(enemy => {
+                    // Move toward player
+                    const angle = Math.atan2(player.y - enemy.y, player.x - enemy.x);
+                    enemy.x += Math.cos(angle) * enemy.speed;
+                    enemy.y += Math.sin(angle) * enemy.speed;
+                    
+                    // Check collision with player
+                    const dist = Math.hypot(player.x - enemy.x, player.y - enemy.y);
+                    if (dist < player.radius + enemy.radius) {
+                        health -= enemy.damage;
+                        healthElement.textContent = Math.max(0, health);
+                        
+                        // Push player away
+                        player.x -= Math.cos(angle) * 8;
+                        player.y -= Math.sin(angle) * 8;
+                        
+                        if (health <= 0) {
+                            gameOver();
+                        }
+                    }
+                });
+                
+                // Update particles
+                particles.forEach((particle, index) => {
+                    particle.x += particle.dx;
+                    particle.y += particle.dy;
+                    particle.life--;
+                    
+                    if (particle.life <= 0) {
+                        particles.splice(index, 1);
+                    }
+                });
+                
+                // Update floating texts
+                floatingTexts.forEach((text, index) => {
+                    text.y -= 1;
+                    text.life--;
+                    
+                    if (text.life <= 0) {
+                        floatingTexts.splice(index, 1);
+                    }
+                });
+                
+                // Update score display
+                scoreElement.textContent = score;
+            }
+            
+            function render() {
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw background grid
+                ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+                ctx.lineWidth = 1;
+                const gridSize = 50;
+                for (let x = 0; x < canvas.width; x += gridSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, canvas.height);
+                    ctx.stroke();
+                }
+                for (let y = 0; y < canvas.height; y += gridSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(canvas.width, y);
+                    ctx.stroke();
+                }
+                
+                // Draw particles
+                particles.forEach(particle => {
+                    ctx.globalAlpha = particle.life / 50;
+                    ctx.fillStyle = particle.color;
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                ctx.globalAlpha = 1;
+                
+                // Draw enemies
+                enemies.forEach(enemy => {
+                    if (enemy.isBoss) {
+                        ctx.shadowColor = 'red';
+                        ctx.shadowBlur = 20;
+                    }
+                    
+                    ctx.fillStyle = enemy.color;
+                    ctx.beginPath();
+                    ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.shadowBlur = 0;
+                    
+                    // Health bar
+                    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                    ctx.fillRect(enemy.x - enemy.radius, enemy.y - enemy.radius - 12, 
+                                 enemy.radius * 2, 6);
+                    
+                    const healthPercent = enemy.health / (enemy.isBoss ? 300 : enemy.radius);
+                    ctx.fillStyle = healthPercent > 0.6 ? '#2ecc71' : 
+                                    healthPercent > 0.3 ? '#f39c12' : '#e74c3c';
+                    ctx.fillRect(enemy.x - enemy.radius, enemy.y - enemy.radius - 12, 
+                                 enemy.radius * 2 * healthPercent, 6);
+                });
+                
+                // Draw arrows
+                arrows.forEach(arrow => {
+                    ctx.save();
+                    ctx.translate(arrow.x, arrow.y);
+                    ctx.rotate(arrow.angle);
+                    
+                    ctx.fillStyle = arrow.type === 'explosive' ? '#e74c3c' : '#f39c12';
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(10, 3);
+                    ctx.lineTo(20, 0);
+                    ctx.lineTo(10, -3);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    if (arrow.type === 'explosive') {
+                        ctx.fillStyle = 'yellow';
+                        ctx.beginPath();
+                        ctx.arc(20, 0, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    
+                    ctx.restore();
+                });
+                
+                // Draw lasers
+                lasers.forEach(laser => {
+                    ctx.save();
+                    ctx.translate(laser.x, laser.y);
+                    ctx.rotate(laser.angle);
+                    
+                    const alpha = laser.life / laser.maxLife;
+                    ctx.globalAlpha = alpha;
+                    
+                    // Laser glow
+                    ctx.strokeStyle = '#00ffff';
+                    ctx.lineWidth = laser.width;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(laser.length, 0);
+                    ctx.stroke();
+                    
+                    // Laser core
+                    ctx.strokeStyle = 'white';
+                    ctx.lineWidth = laser.width / 2;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(laser.length, 0);
+                    ctx.stroke();
+                    
+                    ctx.globalAlpha = 1;
+                    ctx.restore();
+                });
+                
+                // Draw player
+                ctx.fillStyle = player.color;
+                ctx.beginPath();
+                ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw player eyes
+                let angle = movementJoystickActive ? 
+                    Math.atan2(-movementJoystickY, -movementJoystickX) : 
+                    -Math.PI/2;
+                
+                const eye1X = player.x + Math.cos(angle) * 12;
+                const eye1Y = player.y + Math.sin(angle) * 12;
+                const eye2X = player.x + Math.cos(angle) * 12 - Math.cos(angle - Math.PI/2) * 10;
+                const eye2Y = player.y + Math.sin(angle) * 12 - Math.sin(angle - Math.PI/2) * 10;
+                
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(eye1X, eye1Y, 6, 0, Math.PI * 2);
+                ctx.arc(eye2X, eye2Y, 6, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = 'black';
+                ctx.beginPath();
+                ctx.arc(eye1X + Math.cos(angle) * 3, eye1Y + Math.sin(angle) * 3, 3, 0, Math.PI * 2);
+                ctx.arc(eye2X + Math.cos(angle) * 3, eye2Y + Math.sin(angle) * 3, 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw floating texts
+                floatingTexts.forEach(text => {
+                    ctx.globalAlpha = text.life / 60;
+                    ctx.fillStyle = text.color;
+                    ctx.font = 'bold 18px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(text.text, text.x, text.y);
+                });
+                ctx.globalAlpha = 1;
+            }
+            
+            function gameOver() {
+                gameRunning = false;
+                finalScoreElement.textContent = `Score: ${score}`;
+                gameOverScreen.style.display = 'flex';
+                
+                // Save user progress
+                if (currentUser) {
+                    currentUser.score = score;
+                    localStorage.setItem('archerio_current_user', JSON.stringify(currentUser));
+                }
+                
+                // Clear all intervals
+                clearInterval(window.enemySpawnInterval);
+            }
+            
+            // Event listeners
+            shootButton.addEventListener('touchstart', shoot);
+            shootButton.addEventListener('mousedown', shoot);
+        }
+    </script>
+</body>
+</html>
